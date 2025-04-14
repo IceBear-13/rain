@@ -1,26 +1,47 @@
+import Message from "../components/Message";
+import Sidebar from "../components/Sidebar";
+import { message } from "../types/interface";
+import TextArea from "../components/TextArea";
+import ChatHeader from "../components/ChatHeader";
+
 export default function TextPage() {
+  const messages: Array<message> = [
+    {
+      id: "1",
+      from: "user",
+      content: "Hello, how are you?"
+    },
+    {
+      id: "2", 
+      from: "assistant",
+      content: "I'm doing well, thank you for asking!"
+    }
+  ];
+
   return (
     <>
-      <div className="flex h-screen w-screen">
-        {/* Sidebar - 20% width */}
-        <div className="h-full bg-red-400 w-[20%]">sidebar section</div>
-        
-        {/* Main content area - 80% width */}
-        <div className="relative h-full w-[80%]" id="main-section">
+      <div className="flex h-screen w-screen overflow-hidden">
+        {/* Resizable Sidebar */}
+        <Sidebar className="bg-gray-100">
+          sidebar
+        </Sidebar>
+
+        {/* Main content area - takes remaining width */}
+        <div className="relative h-full flex-1 flex flex-col" id="main-section">
           {/* Header bar */}
-          <div className="bg-black h-[50px] flex items-center sticky top-0 justify-between w-full px-1" id="header-section">
-            <div className="flex items-center space-x-1 text-white">
-              <img src="/avatar-default.svg" className="size-[20px] rounded-full"/>
-              <h2>Name</h2>
+          <ChatHeader />
+          
+          {/* Message content - flex-col-reverse makes newest messages appear at bottom */}
+          <div className="flex-1 overflow-y-auto p-1 flex flex-col-reverse">
+            <div className="flex flex-col w-full">
+              {messages.map((message, index) => (
+                <Message key={message.id} id={message.id} from={message.from} content={message.content} />
+              ))}
             </div>
-            <div className="text-white">Search bar</div>
           </div>
           
-          {/* Content would go here */}
-          <div className="h-[calc(100%-90px)]"></div>
-          
           {/* Footer bar */}
-          <div className="bg-pink-400 w-full h-[45px] items-center flex sticky bottom-0">Text section</div>
+          <TextArea />
         </div>
       </div>
     </>
