@@ -3,6 +3,7 @@ import Sidebar from "../components/Sidebar";
 import { message } from "../types/interface";
 import TextArea from "../components/TextArea";
 import ChatHeader from "../components/ChatHeader";
+import Chats from "../components/Chats";
 
 export default function TextPage() {
   const messages: Array<message> = [
@@ -23,7 +24,8 @@ export default function TextPage() {
       <div className="flex h-screen w-screen overflow-hidden">
         {/* Resizable Sidebar */}
         <Sidebar className="bg-gray-100">
-          sidebar
+          
+          <Chats />
         </Sidebar>
 
         {/* Main content area - takes remaining width */}
