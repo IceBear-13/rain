@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
 import * as messageService from '../services/messageService';
+import { AuthRequest } from '../types/requestInterface';
 
-export const getAllMessages = async (req: Request, res: Response): Promise<void> => {
+export const getAllMessages = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const messages = await messageService.getAllMessages();
     res.json(messages);

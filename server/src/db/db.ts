@@ -1,13 +1,20 @@
-import mongoose from 'mongoose';
+import { createClient } from "@supabase/supabase-js";
+import dotenv from "dotenv";
 
-const connectDB = async (): Promise<void> => {
-  try {
-    const conn = await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/messaging-app');
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
-  } catch (error) {
-    console.error(`Error: ${error}`);
-    process.exit(1);
-  }
-};
+dotenv.config();
 
-export default connectDB;
+const supabaseUrl = process.env.SUPABASE_URL as string;
+const supabaseKey = process.env.SUPABASE_KEY as string;
+const supabaseAdminKey = process.env.SUPABASE_SECRET_KEY as string;
+
+export const supabase = createClient(supabaseUrl, supabaseKey, {
+  auth: {
+    persistSession: false,
+  },
+});
+
+export const supabaseAdmin = createClient(supabaseUrl, supabaseAdminKey, {
+  auth: {
+    persistSession: false,
+  },
+});
