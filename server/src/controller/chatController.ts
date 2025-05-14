@@ -1,74 +1,50 @@
 import { AuthRequest, ChatRequest } from "../types/requestInterface";
-import { Response, NextFunction } from "express";
-import dotenv from "dotenv";
+import { Response } from "express";
 import { loadChat, loadChatMessages, loadChats } from "../services/chatService";
-import { chat } from "../models/chatModel";
-import { messages } from "../models/messagesModel";
 
-
-dotenv.config();
-
-
-export const loadChatDetails = async (req: ChatRequest, res: Response, next: NextFunction) => {
+export const loadChatDetails = async (req: ChatRequest, res: Response): Promise<void> => {
   const chatId = req.params.id;
   const userId = req.user?.id;
 
-  if(!chatId){
-    res.status(400).json({ error: "Chat ID is required" });
-  }
-  
-  if (!userId) {
-    res.status(401).json({ error: "User ID is required" });
-  }
-
   if (!chatId || !userId) {
-    return res.status(400).json({ error: "Chat ID and User ID are required" });
+    res.status(400).json({ error: "Chat ID and User ID are required" });
+    return;
   } 
 
   try {
     const chat = await loadChat(chatId, userId);
-
+    
     if (!chat) {
-      return res.status(404).json({ error: "Chat not found" });
+      res.status(404).json({ error: "Chat not found" });
+      return;
     }
 
-    res.status(200).json({chat});
-
-    next();
+    res.status(200).json({ chat });
   } catch (error) {
-    return res.status(500).json({ error: "Internal server error" });
+    console.error("Error loading chat details:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
-}
+};
 
-
-
-export const loadMessages = async (req: ChatRequest, res: Response, next: NextFunction) => {
+export const loadMessages = async (req: ChatRequest, res: Response): Promise<void> => {
   const chatId = req.params.id;
   const userId = req.user?.id;
 
-  if(!chatId){
-    res.status(400).json({ error: "Chat ID is required" });
+  if (!chatId || !userId) {
+    res.status(400).json({ error: "Chat ID and User ID are required" });
     return;
   }
 
-  if (!userId) {
-    res.status(401).json({ error: "User ID is required" });
-    return;
-  }
-
-  try{
-
+  try {
     const messages = await loadChatMessages(chatId, userId);
-
     res.status(200).json({ messages });
-
-    next();
   } catch (error) {
-    return res.status(500).json({ error: "Internal server error" });
+    console.error("Error loading messages:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
-}
+};
 
-export const loadChatList = async (req: AuthRequest, res: Response, next: NextFunction) => {
+export const loadChatList = async (req: AuthRequest, res: Response): Promise<void> => {
   const userId = req.user?.id;
 
   if (!userId) {
@@ -79,17 +55,14 @@ export const loadChatList = async (req: AuthRequest, res: Response, next: NextFu
   try {
     const chatList = await loadChats(userId);
 
-    if (!chatList) {
-      return res.status(404).json({ error: "No chats found" });
+    if (!chatList || chatList.length === 0) {
+      res.status(200).json({ chatList: [] });
+      return;
     }
 
-    if (req.user) {
-      req.user.chats = chatList;
-    }
     res.status(200).json({ chatList });
-
-    next();
   } catch (error) {
-    return res.status(500).json({ error: "Internal server error" });
+    console.error("Error loading chat list:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
-}
+};

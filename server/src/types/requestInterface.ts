@@ -1,26 +1,22 @@
-import { Request } from "express";
-import { chat } from "../models/chatModel";
+import { Request } from 'express';
+import { Server } from 'http';
 
-export interface AuthRequest extends Request{
-  user?: {
-    id: string,
-    email: string,
-    username: string,
-    chats: chat[]
-  };
-};
+// Define the user object structure
+export interface UserPayload {
+  id: string;
+  email?: string;
+  username?: string;
+}
 
-export interface ChatRequest extends Request{
-  user?: {
-    id: string,
-    email: string,
-    username: string,
-    chats: chat[],
-  },
-  chat?: {
-    id: string,
-    name: string,
-    participants_id: string[],
-    created_at: Date,
+// Base authenticated request interface
+export interface AuthRequest extends Request {
+  user?: UserPayload;
+}
+
+// Chat request interface (extends AuthRequest)
+export interface ChatRequest extends AuthRequest {
+  params: {
+    id: string;
+    [key: string]: string;
   };
 }

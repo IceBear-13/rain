@@ -1,5 +1,5 @@
 import { Router, Request, Response } from "express";
-import messageRouter from './messagesRoutes'
+import messageRouter from './chatRoutes'
 import authRouter from "./authRoute";
 
 export const router = Router();

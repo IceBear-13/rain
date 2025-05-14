@@ -172,6 +172,8 @@ export const createChat = async (name: string, type: 'group' | 'private', partic
       participants_id: participantsId,
     };
 
+    return chat;
+
   } catch (error) {
     console.error("Error creating chat:", error);
     return null;
