@@ -83,7 +83,7 @@ io.on('connection', (socket) => {
       }
       
       // Create the message in the database
-      const message = await messageService.createMessage(userId, content);
+      const message = await messageService.createMessage(userId, content, chatId);
       
       // Broadcast the message to all clients in this chat room
       io.to(chatId).emit('newMessage', {

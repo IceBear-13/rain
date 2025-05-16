@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, ReactNode } from 'react';
+import Chats from './Chats';
 
 interface SidebarProps {
   defaultWidth?: number;
@@ -12,7 +13,6 @@ export default function Sidebar({
   defaultWidth = 20,
   minWidth = 10,
   maxWidth = 20,
-  children,
   className = ''
 }: SidebarProps) {
   const [width, setWidth] = useState(defaultWidth);
@@ -59,10 +59,20 @@ export default function Sidebar({
 
   return (
     <div 
-      className={`h-full relative ${className}`}
+      className={`h-full relative flex flex-col ${className}`}
       style={{ width: `${width}%` }}
     >
-      {children}
+      {/* Content area with scrolling */}
+      <div className="flex-grow overflow-auto">
+        <Chats channelName="General" lastMessage="Welcome to the chat" id="general-chat" />
+        {/* Add more content here */}
+      </div>
+
+      {/* User info bar - fixed at bottom */}
+      <div className='flex items-center gap-x-3 p-2 border-t border-gray-200 bg-white'>
+        <img src='avatar-default.svg' className='size-[40px]'/>
+        <h1>Username</h1>
+      </div>
       
       {/* Drag handle - positioned on RIGHT side */}
       <div 

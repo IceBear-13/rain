@@ -1,11 +1,11 @@
-import { supabase } from "../db/db";
+import { supabase, supabaseAdmin } from "../db/db";
 import { chat } from "../models/chatModel";
 import { messages } from "../models/messagesModel";
 
 export const loadChat = async (chatId: string, userId: string): Promise<chat | null> => {
   
   try{
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from("chat")
       .select("*")
       .eq("c_id", chatId)
@@ -50,7 +50,7 @@ export const loadChat = async (chatId: string, userId: string): Promise<chat | n
 
 export const checkIfUserIsParticipant = async (chatId: string, userId: string): Promise<boolean> => {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from("chat_participants")
       .select("user_id")
       .eq("chat_id", chatId)
@@ -98,7 +98,7 @@ export const loadChatMessages = async (chatId: string, userId: string): Promise<
 
 export const loadChats = async (userId: string): Promise<chat[]> => {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from("chat_participants")
       .select("chat_id")
       .eq("user_id", userId);
@@ -110,7 +110,7 @@ export const loadChats = async (userId: string): Promise<chat[]> => {
 
     const chatIds = data.map((chat) => chat.chat_id);
 
-    const { data: chats, error: chatsError } = await supabase
+    const { data: chats, error: chatsError } = await supabaseAdmin
       .from("chat")
       .select("*")
       .in("c_id", chatIds);
@@ -129,7 +129,7 @@ export const loadChats = async (userId: string): Promise<chat[]> => {
 
 export const createChat = async (name: string, type: 'group' | 'private', participantsId: string[]): Promise<chat | null> => {
   try{
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from("chat")
       .insert({ name, type })
       .select()
@@ -142,7 +142,7 @@ export const createChat = async (name: string, type: 'group' | 'private', partic
       return null;
     }
 
-    const { error: participantsError } = await supabase
+    const { error: participantsError } = await supabaseAdmin
       .from("chat_participants")
       .insert(participantsId.map((userId) => ({ chat_id: chatId, user_id: userId })));
 
@@ -156,7 +156,7 @@ export const createChat = async (name: string, type: 'group' | 'private', partic
       return null;
     }
 
-    const { data: chatData, error: chatError } = await supabase
+    const { data: chatData, error: chatError } = await supabaseAdmin
       .from("chat")
       .select("*")
       .eq("c_id", chatId)

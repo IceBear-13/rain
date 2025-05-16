@@ -1,6 +1,7 @@
 import { callbackify } from 'util';
 import { supabase } from '../db/db';
 import { messages } from '../models/messagesModel';
+import crypto from 'crypto';
 
 export const getMessages = async (userId: string) => {
   try {
@@ -35,12 +36,13 @@ export const getMessageById = async (messageId: string) => {
   }
 }
 
-export const createMessage = async (userId: string, content: string) => {
+export const createMessage = async (userId: string, content: string, chatID: string) => {
   try {
+    const message_id = crypto.randomUUID();
     const { data, error } = await supabase
       .from('messages')
       .insert([
-        { user_id: userId, content: content }
+        { m_id: message_id, sender_id: userId, content: content, chat_id: chatID}
       ]);
 
     if (error) {
