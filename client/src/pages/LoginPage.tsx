@@ -3,7 +3,7 @@ import Textbox from "../components/Textbox";
 import Passwordbox from "../components/Password";
 import Buttons from "../components/Buttons";
 import { Navigate, useNavigate } from "react-router-dom";
-import { login } from "../services/api";
+import { login } from "../services/AuthAPI";
 
 export const BACKEND_URL = 'https://rbxdcpy-api.vercel.app/';
 

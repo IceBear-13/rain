@@ -3,20 +3,18 @@ import Sidebar from "../components/Sidebar";
 import { message } from "../types/interface";
 import TextArea from "../components/TextArea";
 import ChatHeader from "../components/ChatHeader";
+import { useEffect, useState } from "react";
+import { Chat } from "../types/socket.types";
+import { loadChat } from "../services/chatAPI";
+import MainContent from "../components/MainContent";
 
 export default function TextPage() {
-  const messages: Array<message> = [
-    {
-      id: "1",
-      from: "user",
-      content: "Hello, how are you?"
-    },
-    {
-      id: "2", 
-      from: "assistant",
-      content: "I'm doing well, thank you for asking!"
-    }
-  ];
+  const [chats, setChats] = useState([] as Chat[]);
+
+  window.onload = async () => {
+    const chatData = await loadChat();
+    setChats(chatData);
+  }
 
   return (
     <>
@@ -28,22 +26,7 @@ export default function TextPage() {
         </Sidebar>
 
         {/* Main content area - takes remaining width */}
-        <div className="relative h-full flex-1 flex flex-col" id="main-section">
-          {/* Header bar */}
-          <ChatHeader />
-          
-          {/* Message content - flex-col-reverse makes newest messages appear at bottom */}
-          <div className="flex-1 overflow-y-auto p-1 flex flex-col-reverse">
-            <div className="flex flex-col w-full">
-              {messages.map((message, index) => (
-                <Message key={message.id} id={message.id} from={message.from} content={message.content} />
-              ))}
-            </div>
-          </div>
-          
-          {/* Footer bar */}
-          <TextArea />
-        </div>
+        <MainContent />
       </div>
     </>
   )
