@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { loginWithEmail, loginWithRainID, registerUser } from "../services/authService";
+import { AuthRequest } from "../types/requestInterface";
 
 export const registerController = async (req: Request, res: Response) => {
   try{
@@ -64,6 +65,30 @@ export const loginController = async (req: Request, res: Response) => {
       },
     });
   } catch(error){
+    console.error(error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+}
+
+export const verifyToken = async (req: AuthRequest, res: Response) => {
+  try {
+    const user = req.user;
+    
+    if (!user) {
+      res.status(401).json({ success: false, message: "Unauthorized" });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Token is valid",
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+      },
+    });
+  } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
