@@ -1,10 +1,10 @@
 import { MouseEventHandler } from "react";
 
 interface buttonContents{
-    buttonText: string,
-    buttonsId: string,
-    buttonName: string,
-    onClickFunction?: MouseEventHandler
+    buttonText: string;
+    buttonsId: string;
+    buttonName: string;
+    onClickFunction?: MouseEventHandler;
 };
 
 export default function Buttons({buttonText, buttonsId, buttonName, onClickFunction}: buttonContents) {

@@ -1,6 +1,6 @@
 export interface User {
   rain_id: string;
-  displayName: string;
+  username: string;
   email: string;
 }
 
@@ -32,12 +32,13 @@ export interface Chat {
   type: 'direct' | 'group';
   participants: User[];
   created_at: string;
-  last_message?: Message;
+  last_message?: string;
 }
 
 // Socket Event Payloads
 export interface JoinChatPayload {
   chatId: string;
+  userId: string;
 }
 
 export interface LeaveChatPayload {
@@ -47,8 +48,7 @@ export interface LeaveChatPayload {
 export interface SendMessagePayload {
   chatId: string;
   content: string;
-  tempId?: string;
-  attachments?: string[]; // IDs of previously uploaded attachments
+  userId: string;
 }
 
 export interface TypingPayload {
@@ -87,7 +87,8 @@ export interface MessageFailedEvent {
 
 // Socket Class Interface for type-safety
 export interface SocketService {
-  connect: (token: string) => void;
+  connect: () => void;
+  authenticate: (token: string) => void;
   disconnect: () => void;
   isConnected: () => boolean;
   joinChat: (chatId: string) => Promise<Message[]>;

@@ -11,23 +11,13 @@ export const loadChat = async (chatId: string, userId: string): Promise<chat | n
       .eq("c_id", chatId)
       .single();
 
-    const { data: participants, error: participantsError } = await supabase
-      .from("chat_participants")
-      .select("user_id")
-      .eq("chat_id", chatId);
-
-    if (participantsError) {
-      console.error("Error loading participants:", participantsError);
-      return null;
-    }
-
-    const participantIds = participants.map((participant) => participant.user_id);
-    const isParticipant = participantIds.includes(userId);
+    const isParticipant = await checkIfUserIsParticipant(chatId, userId);
 
     if (!isParticipant) {
-      console.error("User is not a participant in this chat");
+      // console.error("User is not a participant in this chat");
       return null;
     }
+
 
     if (error) {
       console.error("Error loading chat:", error);
@@ -37,7 +27,6 @@ export const loadChat = async (chatId: string, userId: string): Promise<chat | n
     const chatData = data as chat;
     const chat: chat = {
       ...chatData,
-      participants_id: participantIds,
     };
 
     return chat;
@@ -51,10 +40,10 @@ export const loadChat = async (chatId: string, userId: string): Promise<chat | n
 export const checkIfUserIsParticipant = async (chatId: string, userId: string): Promise<boolean> => {
   try {
     const { data, error } = await supabaseAdmin
-      .from("chat_participants")
-      .select("user_id")
-      .eq("chat_id", chatId)
-      .eq("user_id", userId)
+      .from("chat")
+      .select("user_one, user_two")
+      .eq("c_id", chatId)
+      .or(`user_one.eq.${userId},user_two.eq.${userId}`)
       .single();
 
     if (error) {
@@ -75,7 +64,7 @@ export const loadChatMessages = async (chatId: string, userId: string): Promise<
     const isParticipant = await checkIfUserIsParticipant(chatId, userId);
 
     if (!isParticipant){
-      console.error("User is not a participant in this chat");
+      // console.error("User is not a participant in this chat");
       return [];
     }
 
@@ -99,16 +88,16 @@ export const loadChatMessages = async (chatId: string, userId: string): Promise<
 export const loadChats = async (userId: string): Promise<chat[]> => {
   try {
     const { data, error } = await supabaseAdmin
-      .from("chat_participants")
-      .select("chat_id")
-      .eq("user_id", userId);
+      .from("chat")
+      .select("c_id")
+      .or(`user_one.eq.${userId},user_two.eq.${userId}`);
 
     if (error) {
       console.error("Error loading chats:", error);
       throw error;
     }
 
-    const chatIds = data.map((chat) => chat.chat_id);
+    const chatIds = data.map((chat) => chat.c_id);
 
     const { data: chats, error: chatsError } = await supabaseAdmin
       .from("chat")
@@ -127,29 +116,22 @@ export const loadChats = async (userId: string): Promise<chat[]> => {
   }
 }
 
-export const createChat = async (name: string, type: 'group' | 'private', participantsId: string[]): Promise<chat | null> => {
+export const createChat = async (name: string, participant_one: string, participant_two: string): Promise<chat | null> => {
   try{
+    const chatId = `${participant_one}-${participant_two}`;
     const { data, error } = await supabaseAdmin
       .from("chat")
-      .insert({ name, type })
+      .insert({ name, type: "private", user_one: participant_one, user_two: participant_two, c_id: chatId })
       .select()
       .single();
-
-    const chatId = data?.c_id;
 
     if (!chatId) {
       console.error("Error creating chat: No chat ID returned");
       return null;
     }
 
-    const { error: participantsError } = await supabaseAdmin
-      .from("chat_participants")
-      .insert(participantsId.map((userId) => ({ chat_id: chatId, user_id: userId })));
 
-    if (participantsError) {
-      console.error("Error adding participants:", participantsError);
-      return null;
-    }
+
 
     if (error) {
       console.error("Error creating chat:", error);
@@ -169,7 +151,7 @@ export const createChat = async (name: string, type: 'group' | 'private', partic
 
     const chat: chat = {
       ...chatData,
-      participants_id: participantsId,
+      participants_id: [participant_one, participant_two],
     };
 
     return chat;

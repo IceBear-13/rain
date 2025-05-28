@@ -19,6 +19,8 @@ export default function TextArea() {
     window.addEventListener('resize', adjustHeight);
     return () => window.removeEventListener('resize', adjustHeight);
   }, []);
+
+
   
   return (
     <div className="p-1">
@@ -30,7 +32,7 @@ export default function TextArea() {
           onInput={adjustHeight}
           rows={1}
         ></textarea>
-        <button>send</button>
+        <button onClick={() => {}}>send</button>
       </div>
     </div>
   );

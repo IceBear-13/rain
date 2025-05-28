@@ -3,6 +3,7 @@ import { Message } from "../types/socket.types";
 import ChatHeader from "./ChatHeader";
 import TextArea from "./TextArea";
 import { loadMessages } from "../services/chatAPI";
+import socketService from "../services/socketService";
 
 export default function MainContent() {
     const [messages, setMessages] = useState([] as Message[]);
@@ -10,11 +11,28 @@ export default function MainContent() {
     const [error, setError] = useState(false);
 
     useEffect(() => {
+        const connect = async () => {
+            socketService.connect();
+            if (!socketService.isConnected()) {
+                console.error('Socket connection failed');
+                setError(true);
+            }
+
+            try {
+                await socketService.authenticate(localStorage.getItem('token') || '');
+                console.log('Socket authenticated successfully');
+            } catch (error) {
+                console.error('Socket authentication failed:', error);
+                setError(true);
+            }
+
+        }
         const fetchMessages = async () => {
             setLoading(true);
             try{
-                const response = await loadMessages(localStorage.getItem('selectedChatId') as string);
+                const response = await loadMessages(localStorage.getItem('selectedChatId') || 'noChatId');
                 setMessages(response);
+                console.log(response);
             }  catch (error) {
                 console.error(error);
                 setError(true);
@@ -22,6 +40,7 @@ export default function MainContent() {
             setLoading(false);
         }
         fetchMessages();
+        connect();
 
     }, []);
     return (
@@ -40,7 +59,7 @@ export default function MainContent() {
                     ) : messages.length === 0 ? (
                         <div className="text-center py-4">No messages yet. Start a conversation!</div>
                     ) : (
-                        messages.map((message) => (
+                        Array.isArray(messages) ? messages.map((message) => (
                             <div 
                                 key={message.id} 
                                 className={`py-2 px-4 my-1 max-w-3/4 rounded-lg ${
@@ -49,13 +68,13 @@ export default function MainContent() {
                                         : 'mr-auto bg-gray-200'
                                 }`}
                             >
-                                <div className="text-sm font-semibold">{message.sender.displayName}</div>
+                                <div className="text-sm font-semibold">{message.sender.username}</div>
                                 <div>{message.content}</div>
                                 <div className="text-xs opacity-70 text-right">
                                     {new Date(message.created_at).toLocaleTimeString()}
                                 </div>
                             </div>
-                        ))
+                        )) : <div className="text-center py-4">Invalid message data received.</div>
                     )}
                 </div>
             </div>

@@ -5,13 +5,14 @@ import cors from 'cors';
 import * as chatService from './services/chatService';
 import * as messageService from './services/messageService';
 import { router } from './routes';
+import { verifyToken } from './services/userService';
 
 // Initialize Express app
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: '*',
+    origin: 'http://localhost:5173',
     methods: ['GET', 'POST']
   }
 });
@@ -32,9 +33,20 @@ io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
   
   // Authenticate user and join their chats
-  socket.on('authenticate', async ({ userId }) => {
-    if (!userId) return;
+  socket.on('authenticate', async ({ token }) => {
+    if (!token) return;
     
+    // Verify token and get userId
+    const user = verifyToken(token);
+
+    if (!user) {
+      console.error('Authentication failed for socket:', socket.id);
+      socket.emit('unauthorized', { message: 'Invalid token' });
+      return;
+    }
+
+    const userId = user.id;
+    console.log(userId);
     // Associate socket with user
     userSockets.set(userId, socket.id);
     socketUsers.set(socket.id, userId);

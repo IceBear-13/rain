@@ -1,6 +1,7 @@
 import { AuthRequest, ChatRequest } from "../types/requestInterface";
 import { Response } from "express";
 import { loadChat, loadChatMessages, loadChats } from "../services/chatService";
+import { createChat } from "../services/chatService";
 
 export const loadChatDetails = async (req: ChatRequest, res: Response): Promise<void> => {
   const chatId = req.params.id;
@@ -63,6 +64,30 @@ export const loadChatList = async (req: AuthRequest, res: Response): Promise<voi
     res.status(200).json({ chatList });
   } catch (error) {
     console.error("Error loading chat list:", error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: error });
   }
 };
+
+export const createChatController = async (req: AuthRequest, res: Response): Promise<void> => {
+  const userId = req.user?.id;
+
+  if (!userId) {
+    res.status(401).json({ error: "User ID is required" });
+    return;
+  }
+
+  try {
+    const { name, type, participants } = req.body;
+    const newChat = await createChat(name, type, participants)
+      
+    if (!newChat) {
+      res.status(500).json({ error: "Failed to create chat" });
+      return;
+    }
+
+    res.status(201).json({ chat: newChat });
+  } catch (error) {
+    console.error("Error creating chat:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}

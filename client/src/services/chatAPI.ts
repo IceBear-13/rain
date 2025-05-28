@@ -1,12 +1,12 @@
 import axios from "axios";
 import socketService from "./socketService";
-import { Chat, Message } from "../types/socket.types";
+import { Message } from "../types/socket.types";
 
 const BACKEND_ENDPOINT = 'http://localhost:3000/'
 
 export const loadChat = async () => {
     try {
-        const response = await axios.get(`${BACKEND_ENDPOINT}api/chat`, {
+        const response = await axios.get(`${BACKEND_ENDPOINT}api/chats`, {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
@@ -14,7 +14,7 @@ export const loadChat = async () => {
         );
 
         if (response.status === 200) {
-            return response.data as Chat[];
+            return response.data.chatList;
         } else {
             throw new Error('Failed to load chat');
         }
@@ -26,14 +26,14 @@ export const loadChat = async () => {
 
 export const loadMessages = async (chat_id: string) => {
     try {
-        const response = await axios.get(`${BACKEND_ENDPOINT}api/chat/${chat_id}`, {
+        const response = await axios.get(`${BACKEND_ENDPOINT}api/chats/${chat_id}`, {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
         })
 
         if (response.status === 200) {
-            return response.data as Message[];
+            return response.data.messages as Message[];
         } else {
             throw new Error('Failed to load messages');
         }

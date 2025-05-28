@@ -20,7 +20,7 @@ class SocketServiceImpl implements SocketService {
     this.url = url;
   }
   
-  connect(token: string): void {
+  connect(): void {
     if (this.socket) {
       this.socket.disconnect();
     }
@@ -32,9 +32,23 @@ class SocketServiceImpl implements SocketService {
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
       timeout: 20000,
-      auth: { token }
     });
     
+    this.socket.connect();
+  }
+
+  authenticate(): void {
+    if (!this.socket) {
+      throw new Error('Socket not connected');
+    }
+    
+    this.socket.emit('authenticate', { token: localStorage.getItem('token') }, (response: { success: boolean, error?: string }) => {
+      if (!response.success) {
+        console.error('Authentication failed:', response.error || 'Unknown error');
+      } else {
+        console.log('Socket authenticated successfully');
+      }
+    });
     this.socket.connect();
   }
   
@@ -56,7 +70,7 @@ class SocketServiceImpl implements SocketService {
         return;
       }
       
-      const payload: JoinChatPayload = { chatId };
+      const payload: JoinChatPayload = { chatId, userId: localStorage.getItem('userId') || '' };
       
       this.socket.emit('joinChat', payload, (response: JoinChatResponse) => {
         if (response.success) {
@@ -81,14 +95,13 @@ class SocketServiceImpl implements SocketService {
     }
     
     // Generate temp ID if not provided
-    const tempId = payload.tempId || `temp-${Date.now()}`;
     
     this.socket.emit('sendMessage', {
-      ...payload,
-      tempId
+      ...payload
     });
     
-    return tempId;
+    return payload.chatId;
+    
   }
   
   setTyping(chatId: string, isTyping: boolean): void {
@@ -126,7 +139,7 @@ class SocketServiceImpl implements SocketService {
 
 // Create and export a singleton instance
 const socketService: SocketService = new SocketServiceImpl(
-  'http://localhost:3001'
+  'http://localhost:3000'
 );
 
 export default socketService;

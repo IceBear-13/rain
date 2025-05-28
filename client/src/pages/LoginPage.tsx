@@ -16,8 +16,6 @@ export default function Login() {
   const handleSignin = () => {
     const username = (document.getElementById("uNameLogin") as HTMLInputElement).value;
     const password = (document.getElementById("pwdLogin") as HTMLInputElement).value;
-    const rememberMe = (document.getElementById("rememberMe") as HTMLInputElement).checked;
-
     const response = login(username, password);
     response
         .then((res) => {
@@ -25,7 +23,8 @@ export default function Login() {
                 setIsVerified(true);
                 localStorage.setItem("token", res.token);
                 localStorage.setItem("rain_id", res.user.id);
-                localStorage.setItem("rememberMe", rememberMe.toString());
+                localStorage.setItem("username", res.user.username);
+                console.log(res);
                 navigate("/chat");
             }
         })
