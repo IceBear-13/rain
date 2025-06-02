@@ -49,7 +49,7 @@ export const createMessage = async (userId: string, content: string, chatID: str
       throw new Error('Error creating message');
     }
 
-    return data;
+    return content;
   } catch (error) {
     throw new Error('Error creating message');
   }

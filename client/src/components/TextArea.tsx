@@ -1,4 +1,5 @@
 import { useRef, useEffect } from 'react';
+import socketService from '../services/socketService';
 
 export default function TextArea() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -13,6 +14,30 @@ export default function TextArea() {
       textarea.style.height = `${textarea.scrollHeight}px`;
     }
   };
+
+  const handleSend = () => {
+    const content = textareaRef.current?.value.trim();
+    const userId = localStorage.getItem('rain_id') as string;
+    const chatId = localStorage.getItem('selectedChatId') as string;
+
+    if (!content || content.length === 0 || !userId || !chatId) {
+      console.error('Content, userId, or chatId is missing');
+      return;
+    }
+
+    const payload = {
+      content,
+      userId,
+      chatId,
+    }
+
+    try {
+      socketService.sendMessage(payload);
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
+
+  }
   
   useEffect(() => {
     // Add resize listener for window resizing
@@ -32,7 +57,7 @@ export default function TextArea() {
           onInput={adjustHeight}
           rows={1}
         ></textarea>
-        <button onClick={() => {}}>send</button>
+        <button onClick={() => {handleSend()}}>send</button>
       </div>
     </div>
   );

@@ -1,5 +1,4 @@
 import React from "react";
-import { Message } from "../types/socket.types";
 
 interface chatProperty{
     channelName: string;

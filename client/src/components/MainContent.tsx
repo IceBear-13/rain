@@ -3,36 +3,21 @@ import { Message } from "../types/socket.types";
 import ChatHeader from "./ChatHeader";
 import TextArea from "./TextArea";
 import { loadMessages } from "../services/chatAPI";
-import socketService from "../services/socketService";
+import NewChat from "./Newchat";
 
 export default function MainContent() {
     const [messages, setMessages] = useState([] as Message[]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(false);
+    const [isNewChatVisible, setIsNewChatVisible] = useState(false);
 
     useEffect(() => {
-        const connect = async () => {
-            socketService.connect();
-            if (!socketService.isConnected()) {
-                console.error('Socket connection failed');
-                setError(true);
-            }
-
-            try {
-                await socketService.authenticate(localStorage.getItem('token') || '');
-                console.log('Socket authenticated successfully');
-            } catch (error) {
-                console.error('Socket authentication failed:', error);
-                setError(true);
-            }
-
-        }
         const fetchMessages = async () => {
             setLoading(true);
             try{
                 const response = await loadMessages(localStorage.getItem('selectedChatId') || 'noChatId');
                 setMessages(response);
-                console.log(response);
+                // console.log(response);
             }  catch (error) {
                 console.error(error);
                 setError(true);
@@ -40,12 +25,22 @@ export default function MainContent() {
             setLoading(false);
         }
         fetchMessages();
-        connect();
-
     }, []);
+
+    // Listen for custom event to show NewChat
+    useEffect(() => {
+        const handleShowNewChat = () => setIsNewChatVisible(true);
+        window.addEventListener('show-new-chat', handleShowNewChat);
+        return () => window.removeEventListener('show-new-chat', handleShowNewChat);
+    }, []);
+
     return (
         
         <div className="relative h-full flex-1 flex flex-col" id="main-section">
+            <NewChat 
+                isVisible={isNewChatVisible} 
+                onClose={() => setIsNewChatVisible(false)} 
+            />
             {/* Header bar */}
             <ChatHeader />
             

@@ -66,6 +66,34 @@ io.on('connection', (socket) => {
     }
   });
   
+  socket.on('createChat', async (chat_name: string, userId_one: string, userId_two: string) => {
+    try{
+      const existingChat = await chatService.getChatFromParticipants(userId_one, userId_two);
+      if (existingChat) {
+        console.log('Chat already exists:', existingChat);
+        socket.emit('chatExists', { chatId: existingChat.c_id });
+        return;
+      }
+
+      // Create a new chat
+      console.log('Creating new chat:', chat_name, userId_one, userId_two);
+      const chat = await chatService.createChat(chat_name, userId_one, userId_two);
+
+      if (!chat) {
+        console.error('Failed to create chat');
+        socket.emit('error', { message: 'Failed to create chat' });
+        return;
+      }
+
+      socket.join(chat.c_id);
+      const recipientSocketId = userSockets.get(userId_two);
+      
+    } catch (error) {
+      console.error('Error creating chat:', error);
+      socket.emit('error', { message: 'Error creating chat' });
+    }
+  } )
+
   // Join a specific chat room
   socket.on('joinChat', async ({ chatId, userId }) => {
     try {
@@ -80,6 +108,21 @@ io.on('connection', (socket) => {
     } catch (error) {
       console.error('Error joining chat room:', error);
       socket.emit('error', { message: 'Error joining chat room' });
+    }
+  });
+
+  socket.on('leaveChat', async ({ chatId, userId }) => {
+    try {
+      const isParticipant = await chatService.checkIfUserIsParticipant(chatId, userId);
+      if (isParticipant) {
+        socket.leave(chatId);
+        console.log(`User ${userId} left chat room ${chatId}`);
+      } else {
+        socket.emit('error', { message: 'Not authorized to leave this chat' });
+      }
+    } catch (error) {
+      console.error('Error leaving chat room:', error);
+      socket.emit('error', { message: 'Error leaving chat room' });
     }
   });
   
@@ -122,9 +165,23 @@ io.on('connection', (socket) => {
     }
     console.log('User disconnected:', socket.id);
   });
+
+  socket.on('error', (error) => {
+    console.error('Socket error:', error);
+    socket.emit('error', { message: 'An error occurred' });
+  });
+
+  socket.on('unauthorized', (error) => {
+    console.error('Unauthorized access:', error);
+    socket.emit('unauthorized', { message: 'Unauthorized access' });
+  });
+
 });
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+export default server;
+export { io };

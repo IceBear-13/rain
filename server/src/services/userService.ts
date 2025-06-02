@@ -1,6 +1,5 @@
 import jwt from 'jsonwebtoken';
 import { User } from '@supabase/supabase-js';
-import { supabaseAdmin } from '../db/db';
 import dotenv from 'dotenv';
 
 dotenv.config();

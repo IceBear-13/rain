@@ -41,9 +41,9 @@ export const checkIfUserIsParticipant = async (chatId: string, userId: string): 
   try {
     const { data, error } = await supabaseAdmin
       .from("chat")
-      .select("user_one, user_two")
+      .select("participant_one, participant_two")
       .eq("c_id", chatId)
-      .or(`user_one.eq.${userId},user_two.eq.${userId}`)
+      .or(`participant_one.eq.${userId},participant_two.eq.${userId}`)
       .single();
 
     if (error) {
@@ -90,7 +90,7 @@ export const loadChats = async (userId: string): Promise<chat[]> => {
     const { data, error } = await supabaseAdmin
       .from("chat")
       .select("c_id")
-      .or(`user_one.eq.${userId},user_two.eq.${userId}`);
+      .or(`participant_one.eq.${userId},participant_two.eq.${userId}`);
 
     if (error) {
       console.error("Error loading chats:", error);
@@ -116,12 +116,38 @@ export const loadChats = async (userId: string): Promise<chat[]> => {
   }
 }
 
-export const createChat = async (name: string, participant_one: string, participant_two: string): Promise<chat | null> => {
-  try{
-    const chatId = `${participant_one}-${participant_two}`;
+export const getChatFromParticipants = async (participant_one: string, participant_two: string): Promise<chat | null> => {
+  try {
     const { data, error } = await supabaseAdmin
       .from("chat")
-      .insert({ name, type: "private", user_one: participant_one, user_two: participant_two, c_id: chatId })
+      .select("*")
+      .or(`participant_one.eq.${participant_one},participant_two.eq.${participant_two}`)
+      .single();
+
+    if (error) {
+      console.error("Error fetching chat from participants:", error);
+      return null;
+    }
+
+    if (!data) {
+      console.log("No chat found for the given participants");
+      return null;
+    }
+
+    return data as chat;
+  } catch (error) {
+    console.error("Error fetching chat from participants:", error);
+    return null;
+  }
+}
+
+export const createChat = async (name: string, participant_one: string, participant_two: string): Promise<chat | null> => {
+  try{
+    const chatId = crypto.randomUUID();
+
+    const { data, error } = await supabaseAdmin
+      .from("chat")
+      .insert({ name, participant_one: participant_one, participant_two: participant_two, c_id: chatId })
       .select()
       .single();
 
@@ -129,9 +155,6 @@ export const createChat = async (name: string, participant_one: string, particip
       console.error("Error creating chat: No chat ID returned");
       return null;
     }
-
-
-
 
     if (error) {
       console.error("Error creating chat:", error);
@@ -149,12 +172,7 @@ export const createChat = async (name: string, participant_one: string, particip
       return null;
     }
 
-    const chat: chat = {
-      ...chatData,
-      participants_id: [participant_one, participant_two],
-    };
-
-    return chat;
+    return chatData as chat;
 
   } catch (error) {
     console.error("Error creating chat:", error);

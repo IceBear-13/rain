@@ -91,9 +91,6 @@ export default function Sidebar({
     setIsDragging(true);
   };
 
-  const handleNewChat = () => {
-    
-  }
 
   return (
     <div 
@@ -124,7 +121,12 @@ export default function Sidebar({
 
       {/* User info bar - fixed at bottom */}
       <div className='grid items-center gap-x-3 bg-white'>
-        <a className='hover:bg-gray-100 hover:cursor-pointer border border-gray-200 p-2'>New chat</a>
+        <a 
+          className='hover:bg-gray-100 hover:cursor-pointer border border-gray-200 p-2'
+          onClick={() => window.dispatchEvent(new Event('show-new-chat'))}
+        >
+          New chat
+        </a>
         <div className='flex items-center space-x-2 p-2 border border-gray-200'>
           <img src='avatar-default.svg' className='size-[40px]' alt="User avatar" />
           <h1>{localStorage.getItem('username') || 'User'}</h1>

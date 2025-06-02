@@ -20,7 +20,7 @@ class SocketServiceImpl implements SocketService {
     this.url = url;
   }
   
-  connect(): void {
+  async connect(): Promise<void> {
     if (this.socket) {
       this.socket.disconnect();
     }
@@ -60,7 +60,8 @@ class SocketServiceImpl implements SocketService {
   }
   
   isConnected(): boolean {
-    return !!this.socket?.connected;
+    console.log('Socket connected:', !this.socket?.connected);
+    return !this.socket?.connected;
   }
   
   joinChat(chatId: string): Promise<Message[]> {
@@ -100,6 +101,7 @@ class SocketServiceImpl implements SocketService {
       ...payload
     });
     
+    console.log('Message sent:', payload);
     return payload.chatId;
     
   }

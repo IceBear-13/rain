@@ -6,5 +6,6 @@ const router = express.Router();
 
 router.get('/', authMiddleware, chatController.loadChatList);
 router.get('/:id', authMiddleware, chatController.loadMessages);
+router.post('/create', authMiddleware, chatController.createChatController);
 
 export default router;
