@@ -1,6 +1,7 @@
 import { supabase, supabaseAdmin } from "../db/db";
 import { chat } from "../models/chatModel";
 import { messages } from "../models/messagesModel";
+import { getUserById } from "./userService";
 
 export const loadChat = async (chatId: string, userId: string): Promise<chat | null> => {
   
@@ -64,11 +65,13 @@ export const loadChatMessages = async (chatId: string, userId: string): Promise<
     const isParticipant = await checkIfUserIsParticipant(chatId, userId);
 
     if (!isParticipant){
-      // console.error("User is not a participant in this chat");
+      console.error("User is not a participant in this chat" + chatId);
       return [];
     }
 
-    const { data, error } = await supabase
+    console.log("Loading messages for chat:", chatId, "and user:", userId);
+
+    const { data, error } = await supabaseAdmin
       .from("messages")
       .select("*")
       .eq("chat_id", chatId);
@@ -78,7 +81,18 @@ export const loadChatMessages = async (chatId: string, userId: string): Promise<
       return [];
     }
 
-    return data as messages[];
+    const messagesWithUser = await Promise.all(data.map(async (message) => {
+      const user = await getUserById(message.sender_id);
+
+      return {
+        ...message,
+        sender: user,
+      };
+    }));
+
+    // console.log("Messages loaded:", messagesWithUser);
+    return messagesWithUser as messages[];
+
   } catch (error) {
     console.error("Error loading messages:", error);
     return [];

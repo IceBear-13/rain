@@ -1,6 +1,8 @@
+import { User } from "./userModel";
+
 export interface messages {
-  id: string;
-  sender_id: string;
+  m_id: string;
+  sender: User;
   chat_id: string;
   content: string;
   created_at: string;

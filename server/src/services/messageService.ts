@@ -1,7 +1,9 @@
 import { callbackify } from 'util';
-import { supabase } from '../db/db';
+import { supabase, supabaseAdmin } from '../db/db';
 import { messages } from '../models/messagesModel';
 import crypto from 'crypto';
+import { User } from '../models/userModel';
+import { getUserById } from './userService';
 
 export const getMessages = async (userId: string) => {
   try {
@@ -39,19 +41,27 @@ export const getMessageById = async (messageId: string) => {
 export const createMessage = async (userId: string, content: string, chatID: string) => {
   try {
     const message_id = crypto.randomUUID();
-    const { data, error } = await supabase
+    const user = await getUserById(userId);
+    // const message: messages = {
+    //   m_id: message_id,
+    //   sender: user,
+    //   chat_id: chatID,
+    //   content: content,
+    //   created_at: new Date().toISOString()
+    // }
+    const { data, error } = await supabaseAdmin
       .from('messages')
       .insert([
-        { m_id: message_id, sender_id: userId, content: content, chat_id: chatID}
+        { m_id: message_id, sender_id: userId, content: content, chat_id: chatID }
       ]);
 
     if (error) {
-      throw new Error('Error creating message');
+      throw new Error(error.message);
     }
 
     return content;
   } catch (error) {
-    throw new Error('Error creating message');
+    console.error('Error creating message:', error);
   }
 }
 

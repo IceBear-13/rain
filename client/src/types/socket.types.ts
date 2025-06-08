@@ -6,13 +6,12 @@ export interface User {
 
 // Message related types
 export interface Message {
-  id: string;
+  m_id: string;
   content: string;
   sender: User;
   chat_id: string;
   created_at: string;
   updated_at?: string;
-  attachments?: Attachment[];
   status?: 'sending' | 'sent' | 'delivered' | 'read' | 'failed';
 }
 
@@ -27,10 +26,10 @@ export interface Attachment {
 
 // Chat related types
 export interface Chat {
-  id: string;
+  c_id: string;
   name: string;
-  type: 'direct' | 'group';
-  participants: User[];
+  participant_one: string;
+  participant_two: string;
   created_at: string;
   last_message?: string;
 }
@@ -96,6 +95,7 @@ export interface SocketService {
   sendMessage: (payload: SendMessagePayload) => string;
   setTyping: (chatId: string, isTyping: boolean) => void;
   onNewMessage: (callback: (event: NewMessageEvent) => void) => void;
+  offNewMessage: (callback: (event: NewMessageEvent) => void) => void;
   onUserTyping: (callback: (event: UserTypingEvent) => void) => void;
   onMessageFailed: (callback: (event: MessageFailedEvent) => void) => void;
   onConnect: (callback: () => void) => void;

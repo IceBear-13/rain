@@ -7,7 +7,7 @@ import socketService from "../services/socketService";
 
 export default function TextPage() {
   const [chats, setChats] = useState([] as Chat[]);
-  const [error, setError] = useState(false);
+  // const [error, setError] = useState(false);
 
 
   window.onload = async () => {
@@ -15,46 +15,28 @@ export default function TextPage() {
     setChats(chatData);
   }
 
-  useEffect(() => {
+// ...existing code...
+useEffect(() => {
     const connect = async () => {
       console.log('Connecting to socket...');
       await socketService.connect();
+      
+      // This check happens immediately after connect() starts, not after it completes
       if (!socketService.isConnected()) {
         console.error('Socket connection failed');
-        setError(true);
+        // setError(true);
       }
 
       try {
-        await socketService.authenticate(localStorage.getItem('token') || '');
+        socketService.authenticate(localStorage.getItem('token') as string); // Remove the parameter here
         console.log('Socket authenticated successfully');
       } catch (error) {
         console.error('Socket authentication failed:', error);
-        setError(true);
+        // setError(true);
       }
-
     }
-
-    const joinChats = async () => {
-        if (chats.length > 0) {
-            for (const chat of chats) {
-                try {
-                    await socketService.joinChat(chat.id);
-                    console.log(`Joined chat ${chat.id}`);
-                } catch (error) {
-                    console.error(`Failed to join chat ${chat.id}:`, error);
-                }
-            }
-        } else {
-            console.warn('No chats available to join');
-        }
-    }
-    const chatData = loadChat();
-    chatData.then((data) => {
-      setChats(data);
-    });
 
     connect();
-    joinChats();
 
     // console.log('i fire once');
   }, []);

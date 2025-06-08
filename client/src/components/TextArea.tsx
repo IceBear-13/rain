@@ -1,5 +1,6 @@
 import { useRef, useEffect } from 'react';
 import socketService from '../services/socketService';
+import { useParams } from 'react-router-dom';
 
 export default function TextArea() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -15,29 +16,35 @@ export default function TextArea() {
     }
   };
 
+  const { id: chatId } = useParams<{ id: string }>();
+
   const handleSend = () => {
-    const content = textareaRef.current?.value.trim();
-    const userId = localStorage.getItem('rain_id') as string;
-    const chatId = localStorage.getItem('selectedChatId') as string;
+      const content = textareaRef.current?.value.trim();
+      const userId = localStorage.getItem('rain_id') as string;
+      // Use chatId from URL instead of localStorage
+      
+      if (!content || content.length === 0 || !userId || !chatId) {
+          console.error('Content, userId, or chatId is missing');
+          return;
+      }
 
-    if (!content || content.length === 0 || !userId || !chatId) {
-      console.error('Content, userId, or chatId is missing');
-      return;
-    }
+      const payload = {
+          content: content,
+          userId: userId,
+          chatId: chatId, // Use URL parameter
+      }
 
-    const payload = {
-      content,
-      userId,
-      chatId,
-    }
-
-    try {
-      socketService.sendMessage(payload);
-    } catch (error) {
-      console.error('Error sending message:', error);
-    }
-
+      try {
+          socketService.sendMessage(payload);
+          // Clear the textarea after sending
+          if (textareaRef.current) {
+              textareaRef.current.value = '';
+          }
+      } catch (error) {
+          console.error('Error sending message:', error);
+      }
   }
+
   
   useEffect(() => {
     // Add resize listener for window resizing

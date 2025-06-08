@@ -8,12 +8,12 @@ interface NewChatProps {
 export default function NewChat({ isVisible, onClose }: NewChatProps) {
     const [rainId, setRainId] = useState('');
 
-    const handleSubmit = () => {
-        const recipientId = rainId;
-        const senderId = localStorage.getItem('userId');
+    // const handleSubmit = () => {
+    //     const recipientId = rainId;
+    //     const senderId = localStorage.getItem('userId');
 
         
-    }
+    // }
     
     if (!isVisible) return null;
     

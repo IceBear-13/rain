@@ -38,6 +38,7 @@ export const loadMessages = async (req: ChatRequest, res: Response): Promise<voi
   }
 
   try {
+    console.log("Loading messages for chat:", chatId, "and user:", userId);
     const messages = await loadChatMessages(chatId, userId);
     res.status(200).json({ messages });
   } catch (error) {

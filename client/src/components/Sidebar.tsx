@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, ReactNode } from 'react';
 import Chats from './Chats';
-import { loadChat } from '../services/chatAPI';
+import { joinChat, loadChat } from '../services/chatAPI';
 import { Chat } from '../types/socket.types';
 
 interface SidebarProps {
@@ -32,10 +32,15 @@ export default function Sidebar({
       
       try {
         const response = await loadChat();
+        console.log(response);
         
         // Check if response is an array
         if (Array.isArray(response)) {
           setChats(response as Chat[]);
+          chats.forEach(chat => {
+            joinChat(chat.c_id);
+          })
+          console.log(chats);
         } else {
           // If it's not an array, set chats to empty array and log error
           console.error('Expected array of chats but got:', response);
@@ -109,9 +114,9 @@ export default function Sidebar({
           // No need to check if chats is an array here since we ensure it above
           chats.map((chat) => (
             <Chats 
-              key={chat.id} 
+              key={chat.c_id} 
               channelName={chat.name} 
-              id={chat.id} 
+              id={chat.c_id}
               // Check if last_message exists before accessing it
               lastMessage={chat.last_message ? chat.last_message : 'Empty chat'} 
             />
@@ -128,7 +133,7 @@ export default function Sidebar({
           New chat
         </a>
         <div className='flex items-center space-x-2 p-2 border border-gray-200'>
-          <img src='avatar-default.svg' className='size-[40px]' alt="User avatar" />
+          <img src='/avatar-default.svg' className='size-[40px]' alt="User avatar" />
           <h1>{localStorage.getItem('username') || 'User'}</h1>
         </div>
       </div>

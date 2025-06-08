@@ -20,7 +20,8 @@ class SocketServiceImpl implements SocketService {
     this.url = url;
   }
   
-  async connect(): Promise<void> {
+
+async connect(): Promise<void> {
     if (this.socket) {
       this.socket.disconnect();
     }
@@ -32,36 +33,54 @@ class SocketServiceImpl implements SocketService {
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
       timeout: 20000,
+      transports: ['websocket']
     });
     
-    this.socket.connect();
-  }
+    return new Promise<void>((resolve, reject) => {
+      if (!this.socket) {
+        reject(new Error('Failed to create socket'));
+        return;
+      }
 
-  authenticate(): void {
+      this.socket.on('connect', () => {
+        console.log('Socket connected successfully');
+        resolve();
+      });
+
+      this.socket.on('connect_error', (error: Error) => {
+        console.error('Socket connection error:', error);
+        reject(error);
+      });
+
+      this.socket.connect();
+    });
+}
+
+  authenticate(token: string): void {
     if (!this.socket) {
-      throw new Error('Socket not connected');
+        throw new Error('Socket not connected');
     }
     
-    this.socket.emit('authenticate', { token: localStorage.getItem('token') }, (response: { success: boolean, error?: string }) => {
-      if (!response.success) {
-        console.error('Authentication failed:', response.error || 'Unknown error');
-      } else {
-        console.log('Socket authenticated successfully');
-      }
+    this.socket.emit('authenticate', { token }, (response: { success: boolean, error?: string }) => {
+        if (!response.success) {
+            console.error('Authentication failed:', response.error || 'Unknown error');
+        } else {
+            console.log('Socket authenticated successfully');
+        }
     });
-    this.socket.connect();
   }
   
   disconnect(): void {
     if (this.socket) {
+      this.cleanupListeners();
       this.socket.disconnect();
       this.socket = null;
     }
   }
   
   isConnected(): boolean {
-    console.log('Socket connected:', !this.socket?.connected);
-    return !this.socket?.connected;
+    console.log('Socket connected:', this.socket?.connected);
+    return this.socket?.connected || false;
   }
   
   joinChat(chatId: string): Promise<Message[]> {
@@ -100,6 +119,8 @@ class SocketServiceImpl implements SocketService {
     this.socket.emit('sendMessage', {
       ...payload
     });
+
+    
     
     console.log('Message sent:', payload);
     return payload.chatId;
@@ -113,9 +134,28 @@ class SocketServiceImpl implements SocketService {
     this.socket.emit('typing', payload);
   }
   
+  private newMessageHandlers: Set<(event: NewMessageEvent) => void> = new Set();
+
   onNewMessage(callback: (event: NewMessageEvent) => void): void {
-    if (!this.socket) return;
-    this.socket.on('newMessage', callback);
+      if (!this.socket) return;
+      this.newMessageHandlers.add(callback);
+      this.socket.on('newMessage', callback);
+      console.log('Listening for new messages');
+  }
+
+  offNewMessage(callback: (event: NewMessageEvent) => void): void {
+      if (!this.socket) return;
+      this.newMessageHandlers.delete(callback);
+      this.socket.off('newMessage', callback);
+  }
+
+  // Add this method to clean up all listeners when disconnecting
+  private cleanupListeners(): void {
+      if (!this.socket) return;
+      this.newMessageHandlers.forEach(handler => {
+          this.socket!.off('newMessage', handler);
+      });
+      this.newMessageHandlers.clear();
   }
   
   onUserTyping(callback: (event: UserTypingEvent) => void): void {
@@ -126,6 +166,11 @@ class SocketServiceImpl implements SocketService {
   onMessageFailed(callback: (event: MessageFailedEvent) => void): void {
     if (!this.socket) return;
     this.socket.on('messageFailed', callback);
+  }
+
+  onJoinChat(callback: (event: JoinChatResponse) => void): void {
+    if (!this.socket) return;
+    this.socket.on('joinChat', callback);
   }
   
   onConnect(callback: () => void): void {
@@ -139,7 +184,6 @@ class SocketServiceImpl implements SocketService {
   }
 }
 
-// Create and export a singleton instance
 const socketService: SocketService = new SocketServiceImpl(
   'http://localhost:3000'
 );

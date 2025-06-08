@@ -31,7 +31,7 @@ const socketUsers = new Map(); // socketId -> userId
 // Socket.io connection
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
-  
+
   // Authenticate user and join their chats
   socket.on('authenticate', async ({ token }) => {
     if (!token) return;
@@ -45,7 +45,7 @@ io.on('connection', (socket) => {
       return;
     }
 
-    const userId = user.id;
+    const userId = user.id as string;
     console.log(userId);
     // Associate socket with user
     userSockets.set(userId, socket.id);
@@ -87,6 +87,11 @@ io.on('connection', (socket) => {
 
       socket.join(chat.c_id);
       const recipientSocketId = userSockets.get(userId_two);
+      if (recipientSocketId) {
+        io.to(recipientSocketId).emit('newChat', { chatId: chat.c_id, chatName: chat_name });
+      }
+      console.log(`Chat created successfully: ${chat.c_id}`);
+
       
     } catch (error) {
       console.error('Error creating chat:', error);
@@ -139,12 +144,14 @@ io.on('connection', (socket) => {
       
       // Create the message in the database
       const message = await messageService.createMessage(userId, content, chatId);
+      console.log('Message created:', message);
       
       // Broadcast the message to all clients in this chat room
       io.to(chatId).emit('newMessage', {
-        chatId,
         message
       });
+
+    console.log('emitted to ' + chatId + ' message: ' + content);
       
     } catch (error) {
       console.error('Error sending message:', error);

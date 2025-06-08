@@ -41,7 +41,7 @@ export const loginWithEmail = async (email: string, password: string) => {
     const token = jwt.sign(
       { id: user.rain_id, username: user.username, email: user.email },
       JWT_SECRET_KEY,
-      { expiresIn: "1h" }
+      { expiresIn: "24h" }
     );
 
     return {
@@ -93,7 +93,7 @@ export const loginWithRainID = async (id: string, password: string) => {
     const token = jwt.sign(
       { id: user.rain_id, username: user.username, email: user.email },
       JWT_SECRET_KEY,
-      { expiresIn: "1h" }
+      { expiresIn: "24h" }
     );
 
     // console.log("User logged in successfully:", user);
@@ -133,7 +133,7 @@ export const registerUser = async (rain_id: string, username: string, email: str
     const token = jwt.sign(
       { id: user.rain_id, username: user.username, email: user.email },
       JWT_SECRET_KEY,
-      { expiresIn: "1h" }
+      { expiresIn: "24h" }
     );
 
     return {

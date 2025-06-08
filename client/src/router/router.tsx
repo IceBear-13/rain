@@ -14,5 +14,9 @@ export const router = createBrowserRouter([
   {
     path: "*",
     element: <h1>404 Not Found</h1>
+  },
+  {
+    path: "/chat/:id",
+    element: <TextPage />
   }
 ])

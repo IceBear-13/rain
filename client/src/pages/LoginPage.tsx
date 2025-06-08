@@ -1,15 +1,15 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Textbox from "../components/Textbox";
 import Passwordbox from "../components/Password";
 import Buttons from "../components/Buttons";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { login } from "../services/AuthAPI";
 
 export const BACKEND_URL = 'https://rbxdcpy-api.vercel.app/';
 
 export default function Login() {
-  const [isVerified, setIsVerified] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  // const [isVerified, setIsVerified] = useState(false);
+  // const [isLoading, setIsLoading] = useState(true);
   const [wrongCredentials, setWrongCredentials] = useState(false);
   const navigate = useNavigate();
 
@@ -20,12 +20,14 @@ export default function Login() {
     response
         .then((res) => {
             if (res.success === "true" || res.success === true) {
-                setIsVerified(true);
+                // setIsVerified(true);
                 localStorage.setItem("token", res.token);
                 localStorage.setItem("rain_id", res.user.id);
                 localStorage.setItem("username", res.user.username);
                 console.log(res);
                 navigate("/chat");
+            } else{
+              setWrongCredentials(true);
             }
         })
     };
