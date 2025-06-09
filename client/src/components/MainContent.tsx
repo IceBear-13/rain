@@ -6,7 +6,6 @@ import TextArea from "./TextArea";
 import { loadMessages } from "../services/chatAPI";
 import NewChat from "./Newchat";
 import socketService from "../services/socketService";
-import io from 'socket.io-client'
 
 
 export default function MainContent() {
@@ -15,19 +14,10 @@ export default function MainContent() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(false);
     const [isNewChatVisible, setIsNewChatVisible] = useState(false);
-    const socket = io('http://localhost:3000', {
-        autoConnect: false,
-        reconnection: true,
-        reconnectionAttempts: Infinity,
-        reconnectionDelay: 1000,
-        reconnectionDelayMax: 5000,
-        timeout: 20000,
-        transports: ['websocket']
-    })
 
     // Handle new messages - now uses chatId from URL
     useEffect(() => {
-        socket.on('newMessage', (data: NewMessageEvent) => {
+        socketService.onNewMessage((data: NewMessageEvent) => {
             console.log('newMessage');
             setMessages(prev => [...prev, data.message]);
         })

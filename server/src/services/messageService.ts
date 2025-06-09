@@ -22,19 +22,20 @@ export const getMessages = async (userId: string) => {
 
 export const getMessageById = async (messageId: string) => {
   try {
-    const { data: message, error } = await supabase
+    const { data: message, error } = await supabaseAdmin
       .from('messages')
-      .select('id, content, created_at')
-      .eq('id', messageId)
+      .select('*')
+      .eq('m_id', messageId)
       .single();
 
     if (error) {
-      throw new Error('Error fetching message');
+      throw new Error(error.message);
     }
 
-    return message;
+    return message as messages;
   } catch (error) {
-    throw new Error('Error fetching message');
+    throw new Error('Error fetching message:' + error
+    );
   }
 }
 
@@ -49,7 +50,7 @@ export const createMessage = async (userId: string, content: string, chatID: str
     //   content: content,
     //   created_at: new Date().toISOString()
     // }
-    const { data, error } = await supabaseAdmin
+    const { error } = await supabaseAdmin
       .from('messages')
       .insert([
         { m_id: message_id, sender_id: userId, content: content, chat_id: chatID }
@@ -59,7 +60,8 @@ export const createMessage = async (userId: string, content: string, chatID: str
       throw new Error(error.message);
     }
 
-    return content;
+    const message = await getMessageById(message_id);
+    return message;
   } catch (error) {
     console.error('Error creating message:', error);
   }

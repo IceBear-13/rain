@@ -21,7 +21,7 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
 
   try{
     const decoded = await jwt.verify(token, JWT_SECRET_KEY);
-    req.user = decoded as {id: string, username: string, email: string};
+    req.user = decoded as {id: string, username: string};
     next();
 
   } catch(error){

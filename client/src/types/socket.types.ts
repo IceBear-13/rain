@@ -1,7 +1,7 @@
 export interface User {
   rain_id: string;
   username: string;
-  email: string;
+  created_at: string;
 }
 
 // Message related types
@@ -11,8 +11,6 @@ export interface Message {
   sender: User;
   chat_id: string;
   created_at: string;
-  updated_at?: string;
-  status?: 'sending' | 'sent' | 'delivered' | 'read' | 'failed';
 }
 
 export interface Attachment {

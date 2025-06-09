@@ -39,7 +39,7 @@ export const loginWithEmail = async (email: string, password: string) => {
     const user: User = data;
 
     const token = jwt.sign(
-      { id: user.rain_id, username: user.username, email: user.email },
+      { id: user.rain_id, username: user.username },
       JWT_SECRET_KEY,
       { expiresIn: "24h" }
     );
@@ -51,7 +51,6 @@ export const loginWithEmail = async (email: string, password: string) => {
       user: {
         id: user.rain_id,
         username: user.username,
-        email: user.email,
       },
     };
 
@@ -91,7 +90,7 @@ export const loginWithRainID = async (id: string, password: string) => {
     const user: User = data;
 
     const token = jwt.sign(
-      { id: user.rain_id, username: user.username, email: user.email },
+      { id: user.rain_id, username: user.username},
       JWT_SECRET_KEY,
       { expiresIn: "24h" }
     );
@@ -105,7 +104,6 @@ export const loginWithRainID = async (id: string, password: string) => {
       user: {
         rain_id: user.rain_id,
         username: user.username,
-        email: user.email
       },
     };
 
@@ -115,11 +113,11 @@ export const loginWithRainID = async (id: string, password: string) => {
   }
 }
 
-export const registerUser = async (rain_id: string, username: string, email: string, password: string) => {
+export const registerUser = async (rain_id: string, username: string, password: string) => {
   try {    
     const { data, error } = await supabaseAdmin
       .from("user")
-      .insert([{ rain_id, username, email, encrypted_password: await hashPassword(password) }])
+      .insert([{ rain_id, username, encrypted_password: await hashPassword(password) }])
       .select()
       .single();
 
@@ -131,7 +129,7 @@ export const registerUser = async (rain_id: string, username: string, email: str
     const user: User = data;
 
     const token = jwt.sign(
-      { id: user.rain_id, username: user.username, email: user.email },
+      { id: user.rain_id, username: user.username },
       JWT_SECRET_KEY,
       { expiresIn: "24h" }
     );
@@ -143,7 +141,6 @@ export const registerUser = async (rain_id: string, username: string, email: str
       user: {
         id: user.rain_id,
         username: user.username,
-        email: user.email,
       },
     };
 

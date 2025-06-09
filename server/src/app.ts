@@ -147,7 +147,7 @@ io.on('connection', (socket) => {
       console.log('Message created:', message);
       
       // Broadcast the message to all clients in this chat room
-      io.to(chatId).emit('newMessage', {
+      socket.to(chatId).emit('newMessage', {
         message
       });
 

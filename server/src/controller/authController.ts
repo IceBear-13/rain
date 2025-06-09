@@ -14,7 +14,7 @@ export const registerController = async (req: Request, res: Response) => {
       return;
     }
 
-    const { success, message, token, user } = await registerUser(rain_id, username, email, password);
+    const { success, message, token, user } = await registerUser(rain_id, username, password);
 
     if (!success) {
       res.status(400).json({ success: false, message });
@@ -28,7 +28,6 @@ export const registerController = async (req: Request, res: Response) => {
       user: {
         id: user.id,
         username: user.username,
-        email: user.email,
       },
     });
   } catch(error){
@@ -61,7 +60,6 @@ export const loginController = async (req: Request, res: Response) => {
       user: {
         id: user.rain_id,
         username: user.username,
-        email: user.email,
       },
     });
   } catch(error){
@@ -85,7 +83,6 @@ export const verifyToken = async (req: AuthRequest, res: Response) => {
       user: {
         id: user.id,
         username: user.username,
-        email: user.email,
       },
     });
   } catch (error) {
